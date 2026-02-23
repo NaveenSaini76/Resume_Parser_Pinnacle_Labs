@@ -25,6 +25,9 @@ python-docx>=0.8.11
 # NLP — Named Entity Recognition
 spacy>=3.7.0
 
+# Production WSGI server
+gunicorn>=21.2.0
+
 # Utilities (usually pre-installed, listed for completeness)
 Jinja2>=3.1.0
 itsdangerous>=2.1.0
