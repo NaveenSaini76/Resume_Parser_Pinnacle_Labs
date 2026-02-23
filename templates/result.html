@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Result &mdash; {{ data.name }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar-custom">
+  <div class="container d-flex align-items-center justify-content-between">
+    <a class="brand" href="/"><i class="bi bi-cpu-fill"></i> Resume Parser AI</a>
+    <div class="d-flex gap-2">
+      <a href="/" class="nav-link-custom"><i class="bi bi-plus-circle me-1"></i>New</a>
+      <a href="/history" class="nav-link-custom"><i class="bi bi-clock-history me-1"></i>History</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <!-- SUCCESS BANNER -->
+  <div class="success-banner fade-up mb-4">
+    <div class="status">
+      <i class="bi bi-check-circle-fill"></i>
+      <div>
+        <h3>Resume Parsed Successfully</h3>
+        <p class="meta mb-0"><strong>{{ filename }}</strong> &nbsp;&bull;&nbsp; Record #{{ resume_id }}</p>
+      </div>
+    </div>
+    <a href="/download/{{ resume_id }}" class="btn-green"><i class="bi bi-download me-2"></i>Download JSON</a>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- ============ LEFT COLUMN ============ -->
+    <div class="col-lg-4">
+
+      <!-- CONTACT INFO -->
+      <div class="glass-card fade-up fade-up-d1 mb-4">
+        <div class="glass-card-header"><i class="bi bi-person-circle"></i> Contact Information</div>
+        <div class="glass-card-body" style="padding:16px 24px;">
+
+          <!-- Name -->
+          <div class="contact-row">
+            <div class="contact-icon name"><i class="bi bi-person-fill"></i></div>
+            <div>
+              <div class="contact-label">Full Name</div>
+              <div class="contact-value" style="font-size:1.1rem; font-weight:700;">
+                {% if data.name and data.name != 'Not Found' %}{{ data.name }}{% else %}<span class="not-found">Not Found</span>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="contact-row">
+            <div class="contact-icon email"><i class="bi bi-envelope-fill"></i></div>
+            <div>
+              <div class="contact-label">Email Address</div>
+              <div class="contact-value">
+                {% if data.email and data.email != 'Not Found' %}<a href="mailto:{{ data.email }}">{{ data.email }}</a>{% else %}<span class="not-found">Not Found</span>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="contact-row">
+            <div class="contact-icon phone"><i class="bi bi-telephone-fill"></i></div>
+            <div>
+              <div class="contact-label">Phone Number</div>
+              <div class="contact-value">
+                {% if data.phone and data.phone != 'Not Found' %}{{ data.phone }}{% else %}<span class="not-found">Not Found</span>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- LinkedIn -->
+          <div class="contact-row">
+            <div class="contact-icon link"><i class="bi bi-linkedin"></i></div>
+            <div>
+              <div class="contact-label">LinkedIn Profile</div>
+              <div class="contact-value">
+                {% if data.linkedin and data.linkedin != 'Not Found' %}
+                  <a href="{{ data.linkedin }}" target="_blank" rel="noopener">{{ data.linkedin }} <i class="bi bi-box-arrow-up-right" style="font-size:.7rem;"></i></a>
+                {% else %}<span class="not-found">Not Found</span>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- GitHub -->
+          <div class="contact-row">
+            <div class="contact-icon github" style="background:rgba(110,84,148,.15); color:#8b5cf6;"><i class="bi bi-github"></i></div>
+            <div>
+              <div class="contact-label">GitHub Profile</div>
+              <div class="contact-value">
+                {% if data.github and data.github != 'Not Found' %}
+                  <a href="{{ data.github }}" target="_blank" rel="noopener">{{ data.github }} <i class="bi bi-box-arrow-up-right" style="font-size:.7rem;"></i></a>
+                {% else %}<span class="not-found">Not Found</span>{% endif %}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SKILLS -->
+      <div class="glass-card fade-up fade-up-d2 mb-4">
+        <div class="glass-card-header">
+          <i class="bi bi-tools"></i> Skills
+          <span class="skill-count">{{ data.skills|length }}</span>
+        </div>
+        <div class="glass-card-body">
+          {% if data.skills %}
+            {% for s in data.skills %}<span class="skill-chip">{{ s }}</span>{% endfor %}
+          {% else %}
+            <p class="not-found mb-0">No skills detected.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ RIGHT COLUMN ============ -->
+    <div class="col-lg-8">
+
+      <!-- SKILL MATCH (if JD was provided) -->
+      {% if data.skill_match and data.skill_match.total_jd_skills > 0 %}
+      {% set pct = data.skill_match.percentage %}
+      {% set level = 'high' if pct >= 70 else ('medium' if pct >= 40 else 'low') %}
+      <div class="glass-card match-card fade-up mb-4">
+        <div class="glass-card-header"><i class="bi bi-bar-chart-fill"></i> Skill Match Analysis</div>
+        <div class="glass-card-body">
+
+          <div class="row align-items-center mb-3">
+            <div class="col-auto">
+              <div class="match-score {{ level }}">{{ pct }}%</div>
+            </div>
+            <div class="col">
+              <div class="progress-track">
+                <div class="progress-fill {{ level }}" style="width:{{ pct }}%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-4"><div class="stat-card"><div class="number" style="color:var(--green);">{{ data.skill_match.matched_count }}</div><div class="label">Matched</div></div></div>
+            <div class="col-4"><div class="stat-card"><div class="number" style="color:var(--red);">{{ data.skill_match.missing_skills|length }}</div><div class="label">Missing</div></div></div>
+            <div class="col-4"><div class="stat-card"><div class="number" style="color:var(--accent-light);">{{ data.skill_match.total_jd_skills }}</div><div class="label">JD Skills</div></div></div>
+          </div>
+
+          {% if data.skill_match.matched_skills %}
+          <p style="color:var(--green); font-weight:600; font-size:.82rem; margin-bottom:8px;"><i class="bi bi-check-circle-fill me-1"></i>MATCHED</p>
+          <div class="mb-3">{% for s in data.skill_match.matched_skills %}<span class="skill-chip matched">{{ s }}</span>{% endfor %}</div>
+          {% endif %}
+
+          {% if data.skill_match.missing_skills %}
+          <p style="color:var(--red); font-weight:600; font-size:.82rem; margin-bottom:8px;"><i class="bi bi-x-circle-fill me-1"></i>TO ACQUIRE</p>
+          <div>{% for s in data.skill_match.missing_skills %}<span class="skill-chip missing">{{ s }}</span>{% endfor %}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- EDUCATION -->
+      <div class="glass-card fade-up fade-up-d1 mb-4">
+        <div class="glass-card-header"><i class="bi bi-mortarboard-fill"></i> Education</div>
+        <div class="glass-card-body">
+          {% if data.education and data.education != 'Not Found' %}
+            <div class="section-content">{{ data.education }}</div>
+          {% else %}<p class="not-found mb-0">Education details not found.</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- EXPERIENCE -->
+      <div class="glass-card fade-up fade-up-d2 mb-4">
+        <div class="glass-card-header"><i class="bi bi-briefcase-fill"></i> Work Experience</div>
+        <div class="glass-card-body">
+          {% if data.experience and data.experience != 'Not Found' %}
+            <div class="section-content">{{ data.experience }}</div>
+          {% else %}<p class="not-found mb-0">Work experience not found.</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="glass-card fade-up fade-up-d3 mb-4">
+        <div class="glass-card-header"><i class="bi bi-kanban-fill"></i> Projects</div>
+        <div class="glass-card-body">
+          {% if data.projects and data.projects != 'Not Found' %}
+            <div class="section-content">{{ data.projects }}</div>
+          {% else %}<p class="not-found mb-0">Projects not found.</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- RAW TEXT (collapsible) -->
+      <div class="glass-card fade-up fade-up-d4 mb-4">
+        <div class="glass-card-header collapse-toggle" data-bs-toggle="collapse" data-bs-target="#rawText" aria-expanded="false">
+          <i class="bi bi-file-text-fill"></i> Raw Text Preview
+          <i class="bi bi-chevron-down ms-auto chevron"></i>
+        </div>
+        <div id="rawText" class="collapse">
+          <div class="glass-card-body">
+            <div class="section-content" style="color:var(--text-dim); font-size:.8rem;">{{ data.raw_text_preview }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM ACTIONS -->
+  <div class="d-flex gap-3 flex-wrap mt-2 mb-5 fade-up">
+    <a href="/" class="btn-accent"><i class="bi bi-plus-circle me-2"></i>Parse Another</a>
+    <a href="/download/{{ resume_id }}" class="btn-green"><i class="bi bi-download me-2"></i>Download JSON</a>
+    <a href="/history" class="btn-ghost"><i class="bi bi-clock-history me-2"></i>View History</a>
+  </div>
+</div>
+
+<footer class="footer-custom">Resume Parser AI &middot; Flask &middot; spaCy &middot; Bootstrap 5</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Animate progress bar on load
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.progress-fill').forEach(el=>{
+    const w=el.style.width; el.style.width='0'; setTimeout(()=>el.style.width=w, 200);
+  });
+  // Chevron rotation for collapse
+  document.querySelectorAll('.collapse-toggle').forEach(el=>{
+    const target=document.querySelector(el.dataset.bsTarget);
+    if(target){ target.addEventListener('shown.bs.collapse',()=>el.setAttribute('aria-expanded','true'));
+                target.addEventListener('hidden.bs.collapse',()=>el.setAttribute('aria-expanded','false')); }
+  });
+});
+</script>
+</body>
+</html>
